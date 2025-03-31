@@ -1,0 +1,9 @@
+{
+  "build": {
+    "nixpacks": {
+      "providers": {
+        "php": "8.3"
+      }
+    }
+  }
+}

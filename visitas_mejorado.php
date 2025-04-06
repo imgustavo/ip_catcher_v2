@@ -1,10 +1,9 @@
 <?php
 // =============================================
-// SCRIPT DE VISITAS PARA RAILWAY (v4.0)
+// SCRIPT DE VISITAS PARA RAILWAY (v4.1)
 // Características:
-// 1. Almacenamiento en PostgreSQL
+// 1. Conexión a PostgreSQL con respaldo de DATABASE_URL
 // 2. Endpoint para ver registros (/visitas?ver_log)
-// 3. Compatible con entornos efímeros
 // =============================================
 
 // --- Configuración inicial --- //
@@ -13,15 +12,28 @@ header('Content-Type: application/json');
 
 // --- Conexión a PostgreSQL (Railway) --- //
 function conectarDB() {
+    // Configuración recomendada para Railway (usa variables de entorno)
+    $databaseUrl = $_ENV['DATABASE_URL'] ?? 'postgresql://postgres:rOqCBSJAvRdhfXTxRDUbYXsfEHwRCHSC@postgres.railway.internal:5432/railway';
+
     try {
-        $url = parse_url($_ENV['DATABASE_URL']);
-        $dsn = "pgsql:host={$url['host']};port={$url['port']};dbname=" . substr($url['path'], 1);
+        $url = parse_url($databaseUrl);
+        if (!$url || !isset($url['host'])) {
+            throw new PDOException("DATABASE_URL mal formada");
+        }
+
+        $dsn = "pgsql:host={$url['host']};port={$url['port']};dbname=".substr($url['path'], 1);
         return new PDO($dsn, $url['user'], $url['pass'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_PERSISTENT => false
         ]);
     } catch (PDOException $e) {
-        die(json_encode(['error' => 'Error de conexión a DB: ' . $e->getMessage()]));
+        error_log("Error de conexión: ".$e->getMessage());
+        die(json_encode([
+            'status' => 'error',
+            'message' => 'Error de conexión a la base de datos',
+            'debug' => (isset($_GET['debug']) ? $e->getMessage() : null
+        ]));
     }
 }
 

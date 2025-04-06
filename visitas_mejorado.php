@@ -6,6 +6,29 @@
 // 2. Endpoint para ver registros (/visitas?ver_log)
 // =============================================
 
+header('Content-Type: text/plain');
+try {
+    // 1. Verifica variables de entorno
+    echo "=== Variables de entorno ===\n";
+    var_dump($_ENV);
+    
+    // 2. Prueba conexión a DB
+    echo "\n=== Prueba de conexión ===\n";
+    $db = new PDO(
+        "pgsql:host=postgres.railway.internal;port=5432;dbname=railway",
+        "postgres",
+        "rOqCBSJAvRdhfXTxRDUbYXsfEHwRCHSC"
+    );
+    echo "✅ Conexión exitosa\n";
+    
+    // 3. Prueba consulta
+    echo "\n=== Prueba de consulta ===\n";
+    $result = $db->query("SELECT 1 AS test")->fetch();
+    print_r($result);
+    
+} catch (Exception $e) {
+    echo "❌ Error: " . $e->getMessage();
+}
 // --- Configuración inicial --- //
 date_default_timezone_set($_ENV['TZ'] ?? 'America/Argentina/Buenos_Aires');
 header('Content-Type: application/json');

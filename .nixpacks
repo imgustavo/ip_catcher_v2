@@ -1,0 +1,28 @@
+{
+  "build": {
+    "timeout": 300,
+    "providers": {
+      "php": "8.3",
+      "node": "18"
+    }
+  },
+  "phases": {
+    "setup": {
+      "pkgs": [
+        "postgresql"
+      ]
+    },
+    "build": {
+      "commands": [
+        "composer install --no-dev"
+      ]
+    },
+    "start": {
+      "cmd": "php -S 0.0.0.0:$PORT visitas_mejorado.php"
+    }
+  },
+  "environment": {
+    "APP_ENV": "production",
+    "NODE_ENV": "production"
+  }
+}
